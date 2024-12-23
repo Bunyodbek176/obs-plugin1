@@ -1,0 +1,36 @@
+name: Build OBS Plugin
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Install Dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential cmake git libx11-dev libgl1-mesa-dev \
+          libxrandr-dev libxcomposite-dev libxinerama-dev libxss-dev \
+          libudev-dev libavcodec-dev libavformat-dev libswscale-dev \
+          libavutil-dev libcurl4-openssl-dev libjansson-dev \
+          libqt5x11extras5-dev qtbase5-dev qttools5-dev-tools
+
+    - name: Build OBS Plugin
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_INSTALL_PREFIX=./output
+        make -j$(nproc)
+
+    - name: Upload Plugin
+      uses: actions/upload-artifact@v3
+      with:
+        name: obs-plugin
+        path: build/output
